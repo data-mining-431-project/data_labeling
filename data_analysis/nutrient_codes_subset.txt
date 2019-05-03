@@ -1,0 +1,4 @@
+203 = Protein
+204 = Total lipid (fat)
+205 = Carbohydrate
+269 = Sugars
