@@ -114,9 +114,41 @@ def get_nutrient_codes_list(fileName):
 	print "Done\n"
 	return codeList
 
+# Takes a Random Sample of the database
+def random_sample(python_database, sample_percent):
+	number_of_samples = 0
+	sub_python_database = dict()
+	keys = python_database.keys()
+	total_items = sample_percent*len(python_database)
+	items_processed = 0.0
+	print "Getting Random Sample..."
+	
+	random.shuffle(keys)
+	for i in range(int(sample_percent*len(python_database))):
+		sub_python_database[keys[i]] = python_database[keys[i]]
+		# Progress Indicator
+		items_processed = items_processed + 1
+		progress_percent = (items_processed/total_items)*100.0
+		if items_processed%1000 == 0:
+			print ("%05.2f%%" % progress_percent)
+
+	print "Done\n"
+	return sub_python_database
+
+def printDatabase(python_database):
+	for id, product in python_database.items():
+		try:
+			print ("ID: %d" % id)
+			print ("Product Name: %s" % product.name)
+		except:
+			pass
+
 def main():
 	python_database = convert_from_json(readJSON(python_database_filename))
 	nutrient_codes = get_nutrient_codes_list(nutrient_codes_filename)
+	subset_database = random_sample(python_database, 0.01)
+	printDatabase(subset_database)
+
 
 if __name__ == '__main__':
 	main()

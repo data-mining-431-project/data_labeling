@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>c2d27d0b-31e6-4301-9538-99625c1bdbbf</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>data_analysis.py</StartupFile>
+    <StartupFile>DatabaseFunctions.pyw</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,6 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DatabaseFunctions.pyw" />
     <Compile Include="data_analysis.py" />
     <Compile Include="product.pyw" />
   </ItemGroup>
