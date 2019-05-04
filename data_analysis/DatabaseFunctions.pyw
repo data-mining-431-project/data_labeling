@@ -14,9 +14,8 @@ import os, sys
 import matplotlib.cm as cm
 import math
 
-python_database_filename = "nutrition_database.json"
-nutrient_codes_filename = "nutrient_codes.txt"
-dir_path = os.path.dirname(os.path.realpath(__file__))
+pythonDatabaseFilename = "nutrition_database.json"
+nutrientCodesFilename = "nutrient_codes.txt"
 
 # Writes a list of Objects to a File in JSON format
 def writeJSON(objList, fileName, flagAppend = False):
@@ -49,7 +48,7 @@ def readJSON(fileName):
 	print "Done\n"
 	return objList
 
-def convert_to_json(python_database):
+def convertToJson(python_database):
 	print "Converting to JSON..."
 	items_processed = 0.0
 	total_items = len(python_database.values())
@@ -65,7 +64,7 @@ def convert_to_json(python_database):
 	print "Done\n"
 	return json_database
 
-def convert_from_json(json_database):
+def convertFromJson(json_database):
 	print "Converting from JSON..."
 	python_database = dict()
 	items_processed = 0.0
@@ -104,7 +103,7 @@ def convert_from_json(json_database):
 	print "Done\n"
 	return python_database
 
-def get_nutrient_codes_list(fileName):
+def getNutrientCodesList(fileName):
 	print "Loading Nutrient Codes From File..."
 	f = open(fileName, 'r+')
 	codeList = []
@@ -115,7 +114,7 @@ def get_nutrient_codes_list(fileName):
 	return codeList
 
 # Takes a Random Sample of the database
-def random_sample(python_database, sample_percent):
+def randomSample(python_database, sample_percent):
 	number_of_samples = 0
 	sub_python_database = dict()
 	keys = python_database.keys()
@@ -144,10 +143,10 @@ def printDatabase(python_database):
 			pass
 
 def main():
-	python_database = convert_from_json(readJSON(python_database_filename))
-	nutrient_codes = get_nutrient_codes_list(nutrient_codes_filename)
-	subset_database = random_sample(python_database, 0.01)
-	printDatabase(subset_database)
+	pythonDatabase = convertFromJson(readJSON(pythonDatabaseFilename))
+	nutrientCodes = getNutrientCodesList(nutrientCodesFilename)
+	subsetDatabase = randomSample(pythonDatabase, 0.01)
+	printDatabase(subsetDatabase)
 
 
 if __name__ == '__main__':
