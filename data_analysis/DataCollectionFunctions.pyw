@@ -14,20 +14,23 @@ def getNutrientValueDict(pythonDatabase, nutrientCodes):
 	for nutrientID in nutrientCodes:
 		nutrientValueList = []
 		for productID, product in pythonDatabase.items():
-			nutrientValueList.append(product.nutrients[nutrientID].value)
+			try:
+				nutrientValueList.append(product.nutrients[nutrientID].value)
+			except:
+				nutrientValueList.append(0.0)
 		nutrientValueDict[nutrientID] = nutrientValueList
 
 	return nutrientValueDict
 
-def readNutrientRelationships(filename):
+def readNutrientRelationships(filename, nutrientCodes):
 	# Read in the nutrient relationship data
 	# assemble into a dictionary of the form
 	# nutrientID : flag
 	# where the flag is a string "normal", "notepad
 	# ", "tooMuchBad"
-	dictionary = dict()
-	dictionary[308] = flag
-	dictionary[308]
+	nutrientRelationshipsDict = dict()
+	for code in nutrientCodes:
+		nutrientRelationshipsDict[code] = "normal"
 
 	return nutrientRelationshipsDict
 
@@ -64,7 +67,7 @@ def idealValueDeviation(nutrientValueDict, idealValuesDict):
 
 	return idealValueDeviationDict
 
-def getProductNutrientDict(pythonDatabase, nutrientRelationshipsDict, idealValuesDict):
+def getProductNutrientDict(pythonDatabase, nutrientCodes, nutrientRelationshipsDict, idealValuesDict):
 	# productNutrientDict dict of form
 	# productID : nutrientDict
 	# where nutrientDict is a dictionary of form
@@ -75,11 +78,14 @@ def getProductNutrientDict(pythonDatabase, nutrientRelationshipsDict, idealValue
 
 	for productID, product in pythonDatabase.items():
 		nutrientDict = dict()
-		for nutrientID, nutrientValue in product.nutrients.items():
-			nutrientDict[nutrientID] = nutrientValue/product.nutrients[208]
-			if nutrientRelationshipsDict[nutrientID] == "lessThanBad" and nutrientDict[nutrientID] > idealValuesDict[nutrientID]:
+		for nutrientID in nutrientRelationshipsDict.keys():
+			try:
+				nutrientDict[nutrientID] = product.nutrients[nutrientID].value/product.nutrients[208]
+			except:
+				nutrientDict[nutrientID] = 0.0
+			if nutrientRelationshipsDict[nutrientID] == "tooMuchBad" and nutrientDict[nutrientID] > idealValuesDict[nutrientID]:
 				nutrientDict[nutrientID] = idealValuesDict[nutrientID]
-			elif nutrientRelationshipsDict[nutrientID] == "moreThanBad" and nutrientDict[nutrientID] < idealValuesDict[nutrientID]:
+			elif nutrientRelationshipsDict[nutrientID] == "tooLittleBad" and nutrientDict[nutrientID] < idealValuesDict[nutrientID]:
 				nutrientDict[nutrientID] = idealValuesDict[nutrientID]
 
 	return productNutrientDict
@@ -120,4 +126,4 @@ def writeProductScores(productScoresDict):
 			labeledData[productID] = 0
 
 	f = open(labeledDataFilename, 'w+')
-	json.dump(obj, f)
+	json.dump(labeledData, f)
