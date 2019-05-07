@@ -1,10 +1,24 @@
 from product import Product, Nutrient
 import json
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.stats as stats
 import random
+from sklearn.linear_model import LogisticRegression
+from sklearn import svm
+import pylab as pl
+from sklearn.cluster import KMeans
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn import preprocessing
 import os, sys
+import matplotlib.cm as cm
+import math
 
-pythonDatabaseFilename = "nutrition_database.json"
-nutrientCodesFilename = "nutrient_codes.txt"
+import pandas as pd
+
+python_database_filename = "nutrition_database.json"
+nutrient_codes_filename = "nutrient_codes.txt"
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # Writes a list of Objects to a File in JSON format
 def writeJSON(objList, fileName, flagAppend = False):
@@ -37,7 +51,7 @@ def readJSON(fileName):
 	print "Done\n"
 	return objList
 
-def convertToJson(python_database):
+def convert_to_json(python_database):
 	print "Converting to JSON..."
 	items_processed = 0.0
 	total_items = len(python_database.values())
@@ -53,7 +67,7 @@ def convertToJson(python_database):
 	print "Done\n"
 	return json_database
 
-def convertFromJson(json_database):
+def convert_from_json(json_database):
 	print "Converting from JSON..."
 	python_database = dict()
 	items_processed = 0.0
@@ -92,7 +106,7 @@ def convertFromJson(json_database):
 	print "Done\n"
 	return python_database
 
-def getNutrientCodesList(fileName):
+def get_nutrient_codes_list(fileName):
 	print "Loading Nutrient Codes From File..."
 	f = open(fileName, 'r+')
 	codeList = []
@@ -102,31 +116,17 @@ def getNutrientCodesList(fileName):
 	print "Done\n"
 	return codeList
 
-# Takes a Random Sample of the database
-def randomSample(python_database, sample_percent):
-	number_of_samples = 0
-	sub_python_database = dict()
-	keys = python_database.keys()
-	total_items = sample_percent*len(python_database)
-	items_processed = 0.0
-	print "Getting Random Sample..."
-	
-	random.shuffle(keys)
-	for i in range(int(sample_percent*len(python_database))):
-		sub_python_database[keys[i]] = python_database[keys[i]]
-		# Progress Indicator
-		items_processed = items_processed + 1
-		progress_percent = (items_processed/total_items)*100.0
-		if items_processed%1000 == 0:
-			print ("%05.2f%%" % progress_percent)
+def get_suggested_intakes():
+	ref_intakes = pd.read_csv('Dietary_Reference_Intakes.csv')
+	#print ref_intakes
+	for i in ref_intakes:
+		for val in i:
+			print val
 
-	print "Done\n"
-	return sub_python_database
+def main():
+	python_database = convert_from_json(readJSON(python_database_filename))
+	nutrient_codes = get_nutrient_codes_list(nutrient_codes_filename)
+	get_suggested_intakes()
 
-def printDatabase(python_database):
-	for id, product in python_database.items():
-		try:
-			print ("ID: %d" % id)
-			print ("Product Name: %s" % product.name)
-		except:
-			pass
+if __name__ == '__main__':()
+main()

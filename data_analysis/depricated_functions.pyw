@@ -184,3 +184,78 @@ def cluster_all_data(python_database, nutrient_codes, low_cluster_limit, high_cl
 			j+=1
 		i+=1
 		j=i+1
+
+def make_nutrient_frequency_file(python_database, nutrient_codes):
+	nutrient_frequency = dict()
+	for nutrient_code in nutrient_codes:
+		nutrient_frequency[nutrient_code] = 0
+
+	for id, product in python_database.items():
+		for nutrient_code in nutrient_codes:
+			try:
+				throw = product.nutrients[nutrient_code].value
+				nutrient_frequency[nutrient_code] += 1
+			except:
+				pass
+	
+	nutrient_frequency_list = []
+	for key, value in zip(nutrient_frequency.keys(), nutrient_frequency.values()):
+		nutrient_frequency_list.append([key, value])
+
+	nutrient_frequency_list = sorted(nutrient_frequency_list, key = lambda nutrient_frequency_list: nutrient_frequency_list[1], reverse = True)
+	writeJSON(nutrient_frequency_list, "nutrient_frequency_list.JSON")
+
+def make_adjusted_nutrient_code_file():
+	nutrient_frequency_list = sorted(readJSON("nutrient_frequency_list.JSON"), key = lambda nutrient_frequency_list: nutrient_frequency_list[0])
+	nutrient_code_list = []
+	for nutrient_code in nutrient_frequency_list:
+		nutrient_code_list.append(nutrient_code[0])
+
+	f = open(nutrient_codes_filename, 'w+')
+	g = open("all_nutrient_codes.txt", 'r+')
+	for line in g.readlines():
+		if int(line[0:3]) in nutrient_code_list:
+			f.write(line)
+	g.close()
+	f.close()
+
+def get_X(python_database, nutrient_codes):
+	X = []
+	for id, product in python_database.items():
+		x = []
+		for nutrient_code in nutrient_codes:
+			try:
+				x.append(product.nutrients[nutrient_code].value)
+			except:
+				x.append(0.0)
+		X.append(x)
+	return X
+
+def find_k(X, low_cluster_limit, high_cluster_limit):
+	x = range(low_cluster_limit, high_cluster_limit+1)
+	y = []
+	items_processed = 0.0
+	total_items = len(x)
+
+	print "Calculating k-values..."
+	for k in x:
+		km = KMeans(n_clusters = k, n_init = 100, n_jobs = -2)
+		km.fit(X)
+		y.append(km.inertia_)
+		# Progress Indicator
+		items_processed = items_processed + 1
+		progress_percent = (items_processed/total_items)*100.0
+		if items_processed%1 == 0:
+			print ("%05.2f%%" % progress_percent)
+	print "Done\n"
+
+	plt.xlabel("k-Clusters")
+	plt.ylabel("SSE")
+	plt.title("Nutrients K-Means")
+	plt.plot(x,y)
+	plt.grid(b=True, which='both')
+	plt.show()
+
+def run_kmeans(python_database, nutrient_codes, low_cluster_limit, high_cluster_limit):
+	X = get_X(python_database, nutrient_codes)
+	find_k(X, low_cluster_limit, high_cluster_limit)
