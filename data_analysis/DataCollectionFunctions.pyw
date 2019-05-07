@@ -31,11 +31,21 @@ def readNutrientRelationships(filename):
 
 	return nutrientRelationshipsDict
 
-def getSuggestedIntakes():
+def getSuggestedIntakes(nutrientCodes):
 	# Zurui
 	# adjustedIdealValue = (idealValue/day) * 1/(suggestedCaloricIntake/day)
 	# process into a dictionary of the form
 	# nutrinetID : adjustedIdealValue
+	
+	idealValuesDict = dict()
+	refIntakes = pd.read_csv('Dietary_Reference_Intakes.csv')
+	for n in range(1,18):
+		for nutrient in refIntakes:
+			idealIntake = refIntakes[nutr][n]/refIntakes[Calories][n]
+			for nutrientID in nutrientCodes:
+				if nutrient in nutrientCodes:
+					nID = nutrientCodes[0,2] 
+					idealValuesDict[nID] = idealIntake
 
 	return idealValuesDict
 
