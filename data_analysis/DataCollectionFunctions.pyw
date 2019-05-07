@@ -44,7 +44,7 @@ def getSuggestedIntakes(nutrientCodes):
 			idealIntake = refIntakes[nutr][n]/refIntakes[Calories][n]
 			for nutrientID in nutrientCodes:
 				if nutrient in nutrientCodes:
-					nID = nutrientCodes[0,2] 
+					nID = nutrientCodes[n] 
 					idealValuesDict[nID] = idealIntake
 
 	return idealValuesDict
