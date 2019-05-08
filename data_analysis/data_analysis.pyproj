@@ -25,6 +25,7 @@
     <Compile Include="DatabaseFunctions.pyw" />
     <Compile Include="DataCollectionFunctionPrototypes.pyw" />
     <Compile Include="data_analysis.py" />
+    <Compile Include="MacFunctions.pyw" />
     <Compile Include="product.pyw" />
   </ItemGroup>
   <ItemGroup>
