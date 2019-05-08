@@ -23,11 +23,19 @@ def readNutrientRelationships(filename):
 	# Read in the nutrient relationship data
 	# assemble into a dictionary of the form
 	# nutrientID : flag
-	# where the flag is a string "normal", "notepad
-	# ", "tooMuchBad"
-	dictionary = dict()
-	dictionary[308] = flag
-	dictionary[308]
+	# where the flag is a string "normal", "tooLittleBad", "tooMuchBad"
+
+	nutrientRelationshipsDict = dict()
+	NutrientRelationshipFilename = "NutrientRelationshipFile.txt"
+
+	for nutrientID in nutrientRelationshipsDict.keys()
+
+	f = open(NutrientRelationshipFilename,"r") #opens file with name of "test.txt"
+	myList = []
+	for line in f:
+    	myList.append(line)
+		print(myList)
+	f.close()
 
 	return nutrientRelationshipsDict
 
