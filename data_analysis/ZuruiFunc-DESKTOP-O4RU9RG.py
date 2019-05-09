@@ -12,7 +12,6 @@ def getSuggestedIntakes(nutrientCodes):
 	
 	idealValuesDict = dict()
 	refIntakes = pd.read_csv('Dietary_Reference_Intakes.csv')
-	print refIntakes
 	for n in range(1,18):
 		for nutrient in refIntakes:
 			idealIntake = refIntakes[nutr][n]/refIntakes[Calories][n]

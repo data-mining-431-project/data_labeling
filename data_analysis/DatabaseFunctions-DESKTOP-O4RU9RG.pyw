@@ -124,33 +124,9 @@ def randomSample(python_database, sample_percent):
 	return sub_python_database
 
 def printDatabase(python_database):
-	for id, product in pythonDatabase.items():
+	for id, product in python_database.items():
 		try:
 			print ("ID: %d" % id)
 			print ("Product Name: %s" % product.name)
 		except:
 			pass
-
-# Unit Conversions
-def performUnitConversionGramsToMilligrams(grams):
-	# grams to milligrams
-	# nutrients that need this conversion: Sodium, Potassium, 
-	return grams*1000
-
-def performUnitConversionMilligramsToMicrorams(milligrams):
-	# milligrams to micrograms
-	# nutrients that need this conversion: Sodium, Potassium, 
-	return milligrams*1000
-
-# IU Conversions are different for each Nutrient
-def performUnitConversionVitaminA(IU):
-	# IU to micrograms
-	return IU/1.667
-
-def performUnitConversionVitaminD(IU):
-	# IU to micrograms
-	return IU/40
-
-def performUnitConversionVitaminE(IU):
-	# IU to milligrams
-	return IU/1.35

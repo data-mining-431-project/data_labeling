@@ -9,26 +9,14 @@ def main():
 	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON(pythonDatabaseFilename))
 	nutrientCodes = DatabaseFunctions.getNutrientCodesList(nutrientCodesFilename)
 	
-	nutrientValueDict = DataCollectionFunctions.getNutrientValueDict(pythonDatabase)
-
-	nutrientRelationshipsDict = DataCollectionFunctions.readNutrientRelationships("")
-
-	idealValuesDict = DataCollectionFunctions.getSuggestedIntakes("male", 22, "very active")
-
+	nutrientValueDict = DataCollectionFunctions.getNutrientValueDict(pythonDatabase, nutrientCodes)
+	nutrientRelationshipsDict = DataCollectionFunctions.readNutrientRelationships("", nutrientCodes)
+	idealValuesDict = DataCollectionFunctions.getSuggestedIntakes(nutrientCodes)
 	idealValueDeviationDict = DataCollectionFunctions.getIdealValueDeviationDict(nutrientValueDict, idealValuesDict)
-
 	productNutrientDict = DataCollectionFunctions.getProductNutrientDict(pythonDatabase, nutrientRelationshipsDict, idealValuesDict)
-
-	standardizedProductNutrientDict = DataCollectionFunctions.convertDataToStandardUnits(idealValuesDict, idealValueDeviationDict, productNutrientDict)
-
-	productScoresDict = DataCollectionFunctions.getProductScores(standardizedProductNutrientDict)
-
+	productNutrientDict = DataCollectionFunctions.convertDataToStandardUnits(idealValuesDict, idealValueDeviationDict, productNutrientDict)
+	productScoresDict = DataCollectionFunctions.getProductScores(productNutrientDict)
 	DataCollectionFunctions.writeProductScores(productScoresDict)
-
-	DataCollectionFunctions.printBestScores(productScoresDict, pythonDatabase)
-
-	#labeledData = DataCollectionFunctions.loadProductLabels()
-	#DataCollectionFunctions.printGoodProducts(pythonDatabase, labeledData)
 
 
 if __name__ == '__main__':

@@ -4,75 +4,153 @@ from product import Product, Nutrient
 import json
 import math
 import DatabaseFunctions
+import pandas as pd
+import numpy as np
 
-def getNutrientValueDict(pythonDatabase, nutrientCodes):
+def readUsedNutrientCodes(filename = "used_nutrient_codes.txt"):
+	nutrientCodes = []
+	f = open(filename)
+	for line in f.readlines():
+		nutrientCodes.append(int(line))
+	return nutrientCodes
+
+def getNutrientValueDict(pythonDatabase):
 	# assembles a dictionary from the python_database in the form
 	# nutrientID : listOfAllNutrientValues
 
+	print "Assembling Nutrient Value Dictionary..."
+
+	nutrientCodes = readUsedNutrientCodes()
 	nutrientValueDict = dict()
 
 	for nutrientID in nutrientCodes:
 		nutrientValueList = []
 		for productID, product in pythonDatabase.items():
 			try:
-				nutrientValueList.append(product.nutrients[nutrientID].value)
+				nutrientValueList.append(product.nutrients[nutrientID].value/product.nutrients[208].value)
 			except:
 				nutrientValueList.append(0.0)
 		nutrientValueDict[nutrientID] = nutrientValueList
 
+	print "Done\n"
+
 	return nutrientValueDict
 
-def readNutrientRelationships(filename, nutrientCodes):
+def readNutrientRelationships(filename):
 	# Read in the nutrient relationship data
 	# assemble into a dictionary of the form
 	# nutrientID : flag
 	# where the flag is a string "normal", "notepad
-	# ", "tooMuchBad"
+	# "normal", "tooLittleBad", "tooMuchBad"
+
+	print "Assembling Nutrient Relationships Dictionary..."
+
 	nutrientRelationshipsDict = dict()
+	nutrientCodes = readUsedNutrientCodes()
+
+	# Placeholder
 	for code in nutrientCodes:
 		nutrientRelationshipsDict[code] = "normal"
+	#
+
+	print "Done\n"
 
 	return nutrientRelationshipsDict
 
-def getSuggestedIntakes(nutrientCodes):
+def getSuggestedIntakes(gender, age, activity):
 	# Zurui
-	# adjustedIdealValue = (idealValue/day) * 1/(suggestedCaloricIntake/day)
+	# adjustedIdealValue = (idealValue/day) / (suggestedCaloricIntake/day)
 	# process into a dictionary of the form
 	# nutrinetID : adjustedIdealValue
-	
+
+	# Mac
+
+	print "Assembling Ideal Values Dictionary..."
+
+	if gender == "male":
+		caloricIntakes = pd.read_csv('Recommended_Male_Caloric_Intakes.csv')
+		nutrientIntakes = pd.read_csv('Recommended_Male_Nutrient_Intakes.csv')
+	elif gender == "female":
+		caloricIntakes = pd.read_csv('Recommended_Female_Caloric_Intakes.csv')
+		nutrientIntakes = pd.read_csv('Recommended_Female_Nutrient_Intakes.csv')
+	else:
+		print "Error:\nIncorrect Input for parameter: Gender"
+
+	if age > 51:
+		caloricAge = 51
+	else:
+		caloricAge = age
+
+	if activity == "not active":
+		dailyCaloriesList = caloricIntakes.values.tolist()
+		dailyCalories = dailyCaloriesList[caloricAge-2][0].split(';')[1]
+	elif activity == "somewhat active":
+		dailyCaloriesList = caloricIntakes.values.tolist()
+		dailyCalories = dailyCaloriesList[caloricAge-2][0].split(';')[2]
+	elif activity == "very active":
+		dailyCaloriesList = caloricIntakes.values.tolist()
+		dailyCalories = dailyCaloriesList[caloricAge-2][0].split(';')[3]
+	else:
+		print "Error:\nIncorrect Input for parameter: Activity Level"
+
+
+	if age > 71:
+		nutrientAge = 71
+	else:
+		nutrientAge = age
+
+	nutrientCodes = readUsedNutrientCodes()
+
+	dailyNutrientsList = nutrientIntakes.values.tolist()
+	dailyNutrients = dailyNutrientsList[nutrientAge-2][0].split(';')
+
 	idealValuesDict = dict()
-	refIntakes = pd.read_csv('Dietary_Reference_Intakes.csv')
-	for n in range(1,18):
-		for nutrient in refIntakes:
-			idealIntake = refIntakes[nutr][n]/refIntakes[Calories][n]
-			for nutrientID in nutrientCodes:
-				if nutrient in nutrientCodes:
-					nID = nutrientCodes[n] 
-					idealValuesDict[nID] = idealIntake
+	for i in range(len(nutrientCodes)):
+		idealValuesDict[nutrientCodes[i]] = float(dailyNutrients[i])/float(dailyCalories)
+
+	print "Done\n"
+	
+	# Zurui
+	#idealValuesDict = dict()
+	#refIntakes = pd.read_csv('Dietary_Reference_Intakes.csv')
+	#print refIntakes
+	#for n in range(1,18):
+	#	for nutrient in refIntakes:
+	#		idealIntake = refIntakes[nutrient][n]/refIntakes[dailyCalories][n]
+	#		for nutrientID in nutrientCodes:
+	#			if nutrient in nutrientCodes:
+	#				nID = nutrientCodes[n] 
+	#				idealValuesDict[nID] = idealIntake
 
 	return idealValuesDict
 
-def idealValueDeviation(nutrientValueDict, idealValuesDict):
+def getIdealValueDeviationDict(nutrientValueDict, idealValuesDict):
 	# Calculate the deviation from the ideal value: sigma
 	# Calculate deviation for all values and return a dict of the form
 	# nutrientID : idealValueDeviation
+
+	print "Calculating and Assembling the Deviation from the Ideal Value Dictionary..."
 
 	idealValueDeviationDict = dict()
 
 	for nutrientID in idealValuesDict.keys():
 		squaredSum = 0
 		for nutrientValue in nutrientValueDict[nutrientID]:
-			squaredSum+=(nutrientValue-idealValuesDict[nutrientID])^2
+			squaredSum+=(nutrientValue-idealValuesDict[nutrientID])**2
 		idealValueDeviationDict[nutrientID] = math.sqrt(squaredSum/len(nutrientValueDict[nutrientID]))
+
+	print "Done\n"
 
 	return idealValueDeviationDict
 
-def getProductNutrientDict(pythonDatabase, nutrientCodes, nutrientRelationshipsDict, idealValuesDict):
+def getProductNutrientDict(pythonDatabase, nutrientRelationshipsDict, idealValuesDict):
 	# productNutrientDict dict of form
 	# productID : nutrientDict
 	# where nutrientDict is a dictionary of form
 	# nutrientID : adjustedNutrientValue
 	# where adjustedNutrientValue depends on if-else block
+
+	print "Assembling Product-Nutrient Dictionary..."
 
 	productNutrientDict = dict()
 
@@ -80,13 +158,16 @@ def getProductNutrientDict(pythonDatabase, nutrientCodes, nutrientRelationshipsD
 		nutrientDict = dict()
 		for nutrientID in nutrientRelationshipsDict.keys():
 			try:
-				nutrientDict[nutrientID] = product.nutrients[nutrientID].value/product.nutrients[208]
+				nutrientDict[nutrientID] = product.nutrients[nutrientID].value/product.nutrients[208].value
 			except:
 				nutrientDict[nutrientID] = 0.0
 			if nutrientRelationshipsDict[nutrientID] == "tooMuchBad" and nutrientDict[nutrientID] > idealValuesDict[nutrientID]:
 				nutrientDict[nutrientID] = idealValuesDict[nutrientID]
 			elif nutrientRelationshipsDict[nutrientID] == "tooLittleBad" and nutrientDict[nutrientID] < idealValuesDict[nutrientID]:
 				nutrientDict[nutrientID] = idealValuesDict[nutrientID]
+		productNutrientDict[productID] = nutrientDict
+
+	print "Done\n"
 
 	return productNutrientDict
 
@@ -94,19 +175,33 @@ def convertDataToStandardUnits(idealValuesDict, idealValueDeviationDict, product
 	# convert data into standard units
 	# (x-iv)/ivDev
 
+	print "Converting to Standard Units and Assembling a Standardized Product-Nutrient Dictionary..."
+
+	standardizedProductNutrientDict = dict()
+	
 	for productID, nutrientDict in productNutrientDict.items():
+		newNutrientDict = dict()
 		for nutrientID, nutrientValue in nutrientDict.items():
-			nutrientValue = (nutrientValue - idealValuesDict[nutrientID])/idealValueDeviationDict[nutrientID]
+			newNutrientDict[nutrientID] = (nutrientValue - idealValuesDict[nutrientID])/idealValueDeviationDict[nutrientID]
+		standardizedProductNutrientDict[productID] = newNutrientDict
 
-	return productNutrientDict
+	print "Done\n"
 
-def getProductScores(productNutrientDict):
+	return standardizedProductNutrientDict
+
+def getProductScores(standardizedProductNutrientDict):
+
+	print "Calculating Product Scores and Assembling Product Scores Dictionary..."
+
 	productScoresDict = dict()
-	for productID, nutrientDict in productNutrientDict.items():
+	
+	for productID, nutrientDict in standardizedProductNutrientDict.items():
 		score = 0
 		for nutrientID, nutrientValue in nutrientDict.items():
 			score += nutrientValue
 		productScoresDict[productID] = score
+
+	print "Done\n"
 
 	return productScoresDict
 
@@ -115,15 +210,56 @@ def writeProductScores(productScoresDict):
 	# 0, productID
 	# 1, productID
 	# where 0 means a bad score and 1 means a good score
+
+	print "Determining Product Labels and Writing to labeledData.json..."
 	
 	labeledData = dict()
-	labeledDataFilename = "labeledData.data"
+	labeledDataFilename = "labeledData.json"
+	hyperParameter = 1
 
 	for productID, score in productScoresDict.items():
-		if score >= 0:
+		if abs(score) < hyperParameter:
 			labeledData[productID] = 1
 		else:
 			labeledData[productID] = 0
 
 	f = open(labeledDataFilename, 'w+')
-	json.dump(labeledData, f)
+	for productID, label in labeledData.items():
+		json.dump([productID, label], f)
+		f.write('\n')
+	f.close()
+
+	print "Done\n"
+
+def loadProductLabels(filename = "labeledData.json"):
+
+	print "Loading Product Labels from labeledData.json..."
+
+	f = open(filename, 'r+')
+	productScoresDict = dict()
+	for line in f.readlines():
+		product = json.loads(line)
+		productScoresDict[int(product[0])] = product[1]
+
+	print "Done\n"
+
+	return productScoresDict
+
+def printGoodProducts(pythonDatabase, labeledData):
+	for productID, product in pythonDatabase.items():
+		if labeledData[productID] == 1:
+			try:
+				print product.name
+			except:
+				pass
+
+def printBestScores(productScoresDict, pythonDatabase):
+	numScoresToPrint = 200
+	sortedProductScoresList = []
+
+	for productID, score in productScoresDict.items():
+		sortedProductScoresList.append([productID, abs(score)])
+	sortedProductScoresList = sorted(sortedProductScoresList, key=lambda product: product[1])
+
+	for i in range(numScoresToPrint):
+		print "%100s | %8d | %3.4f" % (pythonDatabase[sortedProductScoresList[i][0]].name, sortedProductScoresList[i][0], sortedProductScoresList[i][1])
