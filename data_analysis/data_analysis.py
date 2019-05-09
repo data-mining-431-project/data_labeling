@@ -23,13 +23,14 @@ def main():
 
 	productScoresDict = DataCollectionFunctions.getProductScores(standardizedProductNutrientDict)
 
-	DataCollectionFunctions.writeProductScores(productScoresDict)
+	DataCollectionFunctions.writeProductScores(productScoresDict, standardizedProductNutrientDict)
 
 	DataCollectionFunctions.printBestScores(productScoresDict, pythonDatabase)
 
-	#labeledData = DataCollectionFunctions.loadProductLabels()
-	#DataCollectionFunctions.printGoodProducts(pythonDatabase, labeledData)
+	X, Y = DataCollectionFunctions.loadSvmData()
 
+	for i in range(10):
+		print str(Y[i]) + ": " + str(X[i])
 
 if __name__ == '__main__':
 	main()

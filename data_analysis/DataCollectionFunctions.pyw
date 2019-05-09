@@ -12,6 +12,7 @@ def readUsedNutrientCodes(filename = "used_nutrient_codes.txt"):
 	f = open(filename)
 	for line in f.readlines():
 		nutrientCodes.append(int(line))
+	f.close()
 	return nutrientCodes
 
 def getNutrientValueDict(pythonDatabase):
@@ -200,21 +201,23 @@ def getProductScores(standardizedProductNutrientDict):
 		for nutrientID, nutrientValue in nutrientDict.items():
 			score += nutrientValue
 		productScoresDict[productID] = score
+		#productScoresDict[productID] = score/len(nutrientDict)
 
 	print "Done\n"
 
 	return productScoresDict
 
-def writeProductScores(productScoresDict):
+def writeProductScores(productScoresDict, standardizedProductNutrientDict):
 	# write a json file with format:
 	# 0, productID
 	# 1, productID
 	# where 0 means a bad score and 1 means a good score
 
-	print "Determining Product Labels and Writing to labeledData.json..."
+	print "Writing to SVM Files..."
 	
 	labeledData = dict()
-	labeledDataFilename = "labeledData.json"
+	yFilename = "productLabelsY.json"
+	xFilename = "productNutrientValuesX.json"
 	hyperParameter = 1
 
 	for productID, score in productScoresDict.items():
@@ -223,35 +226,50 @@ def writeProductScores(productScoresDict):
 		else:
 			labeledData[productID] = 0
 
-	f = open(labeledDataFilename, 'w+')
+	X = []
+	Y = []
+	nutrientCodes = readUsedNutrientCodes()
 	for productID, label in labeledData.items():
-		json.dump([productID, label], f)
+		nutrientValueList = []
+		for nutrientID in nutrientCodes:
+			nutrientValueList.append(standardizedProductNutrientDict[productID][nutrientID])
+		X.append(nutrientValueList)
+		Y.append(label)
+	f = open(yFilename, 'w+')
+	g = open(xFilename, 'w+')
+	for y in Y:
+		json.dump(y, f)
 		f.write('\n')
+	for x in X:
+		json.dump(x, g)
+		g.write('\n')
 	f.close()
+	g.close()
 
 	print "Done\n"
 
-def loadProductLabels(filename = "labeledData.json"):
+def loadSvmData():
 
-	print "Loading Product Labels from labeledData.json..."
+	print "Loading SVM Data..."
 
-	f = open(filename, 'r+')
-	productScoresDict = dict()
+	yFilename = "productLabelsY.json"
+	xFilename = "productNutrientValuesX.json"
+
+	f = open(yFilename)
+	g = open(xFilename)
+	X = []
+	Y = []
+	for line in g.readlines():
+		X.append(json.loads(line))
 	for line in f.readlines():
-		product = json.loads(line)
-		productScoresDict[int(product[0])] = product[1]
+		Y.append(json.loads(line))
+	f.close()
+	g.close()
 
 	print "Done\n"
 
-	return productScoresDict
-
-def printGoodProducts(pythonDatabase, labeledData):
-	for productID, product in pythonDatabase.items():
-		if labeledData[productID] == 1:
-			try:
-				print product.name
-			except:
-				pass
+	return X, Y
+	# X, Y = loadSvmData()
 
 def printBestScores(productScoresDict, pythonDatabase):
 	numScoresToPrint = 200

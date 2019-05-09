@@ -1,0 +1,10 @@
+Nutrition Relashionships Function
+Converting Nutrient Units
+Add Macronutrients
+-C
+
+Function to assemble the SVM data from the labeled data
+-M
+
+SVM & Crossvalidation
+-Z
