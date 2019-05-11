@@ -49,9 +49,15 @@ def readNutrientRelationships(filename):
 	nutrientRelationshipsDict = dict()
 	nutrientCodes = readUsedNutrientCodes()
 
-	# Placeholder
-	for code in nutrientCodes:
-		nutrientRelationshipsDict[code] = "normal"
+	# Courtney
+	f= open(filename, 'r')
+	nutrientRelationshipsDict = dict()
+	for line in f.readlines():
+		(key, val) = line.split(", ")
+		print(key)
+		print(val)
+		nutrientRelationshipsDict[key] = val
+	f.close()
 	#
 
 	print "Done\n"
@@ -200,8 +206,8 @@ def getProductScores(standardizedProductNutrientDict):
 		score = 0
 		for nutrientID, nutrientValue in nutrientDict.items():
 			score += nutrientValue
-		productScoresDict[productID] = score
-		#productScoresDict[productID] = score/len(nutrientDict)
+		#productScoresDict[productID] = score
+		productScoresDict[productID] = score/len(nutrientDict)
 
 	print "Done\n"
 
@@ -218,7 +224,7 @@ def writeProductScores(productScoresDict, standardizedProductNutrientDict):
 	labeledData = dict()
 	yFilename = "productLabelsY.json"
 	xFilename = "productNutrientValuesX.json"
-	hyperParameter = 1
+	hyperParameter = 0.20
 
 	for productID, score in productScoresDict.items():
 		if abs(score) < hyperParameter:
@@ -272,7 +278,7 @@ def loadSvmData():
 	# X, Y = loadSvmData()
 
 def printBestScores(productScoresDict, pythonDatabase):
-	numScoresToPrint = 200
+	numScoresToPrint = 2200
 	sortedProductScoresList = []
 
 	for productID, score in productScoresDict.items():
@@ -280,4 +286,7 @@ def printBestScores(productScoresDict, pythonDatabase):
 	sortedProductScoresList = sorted(sortedProductScoresList, key=lambda product: product[1])
 
 	for i in range(numScoresToPrint):
-		print "%100s | %8d | %3.4f" % (pythonDatabase[sortedProductScoresList[i][0]].name, sortedProductScoresList[i][0], sortedProductScoresList[i][1])
+		try:
+			print "%100s | %8d | %3.4f" % (pythonDatabase[sortedProductScoresList[i][0]].name, sortedProductScoresList[i][0], sortedProductScoresList[i][1])
+		except:
+			pass

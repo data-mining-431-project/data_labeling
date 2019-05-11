@@ -137,6 +137,11 @@ def performUnitConversionGramsToMilligrams(grams):
 	# nutrients that need this conversion: Sodium, Potassium, 
 	return grams*1000
 
+def performUnitConversionMilligramsToGrams(milligrams):
+	# milligrams to grams
+	# nutrients that need this conversion: Sodium, Potassium
+	return milligrams/1000
+
 def performUnitConversionMilligramsToMicrorams(milligrams):
 	# milligrams to micrograms
 	# nutrients that need this conversion: Sodium, Potassium, 
@@ -154,3 +159,27 @@ def performUnitConversionVitaminD(IU):
 def performUnitConversionVitaminE(IU):
 	# IU to milligrams
 	return IU/1.35
+
+def performUnitConversionsOnDatabase(pythonDatabase):
+	for productID, product in pythonDatabase.items():
+		for nutrientID, nutrient in product.nutrients.items():
+			# Vitamin A
+			if nutrientID == "318":
+				nutrient.value = performUnitConversionVitaminA(nutrient.value)
+			# Vitamin D
+			elif nutrientID == "328":
+				nutrient.value = performUnitConversionVitaminD(nutrient.value)
+			# Vitamin E
+			elif nutrientID == "340":
+				nutrient.value = performUnitConversionVitaminE(nutrient.value)
+			# Copper
+			elif nutrientID == "312":
+				nutrient.value = performUnitConversionMilligramsToMicrorams(nutrient.value)
+			# Potassium
+			elif nutrientID == "306":
+				nutrient.value = performUnitConversionMilligramsToGrams(nutrient.value)
+			# Sodium
+			elif nutrientID == "307":
+				nutrient.value = performUnitConversionMilligramsToGrams(nutrient.value)
+	
+	writeJSON(convertToJson(pythonDatabase), "convertedDatabase.json")

@@ -5,10 +5,7 @@ import DatabaseFunctions
 pythonDatabaseFilename = "nutrition_database.json"
 nutrientCodesFilename = "nutrient_codes.txt"
 
-def main():
-	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON(pythonDatabaseFilename))
-	nutrientCodes = DatabaseFunctions.getNutrientCodesList(nutrientCodesFilename)
-	
+def dataCollection(pythonDatabase, nutrientCodes):
 	nutrientValueDict = DataCollectionFunctions.getNutrientValueDict(pythonDatabase)
 
 	nutrientRelationshipsDict = DataCollectionFunctions.readNutrientRelationships("")
@@ -31,6 +28,17 @@ def main():
 
 	for i in range(10):
 		print str(Y[i]) + ": " + str(X[i])
+
+def main():
+	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON(pythonDatabaseFilename))
+	pythonDatabase = DatabaseFunctions.randomSample(pythonDatabase, 0.01)
+	nutrientCodes = DatabaseFunctions.getNutrientCodesList(nutrientCodesFilename)
+	
+	DatabaseFunctions.performUnitConversionsOnDatabase(pythonDatabase)
+
+	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON("convertedDatabase.json"))
+
+	dataCollection(pythonDatabase, nutrientCodes)
 
 if __name__ == '__main__':
 	main()
