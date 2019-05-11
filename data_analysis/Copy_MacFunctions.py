@@ -26,6 +26,7 @@ def readNutrientRelationships(filename):
 	# where the flag is a string "normal", "tooLittleBad", "tooMuchBad"
 
 	nutrientRelationshipsDict = dict()
+	filename = NutrientRelationshipFilename
 	NutrientRelationshipFilename = "NutrientRelationshipFile.txt"
 
 	for nutrientID in nutrientRelationshipsDict.keys()
