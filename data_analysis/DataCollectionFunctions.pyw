@@ -224,7 +224,7 @@ def writeProductScores(productScoresDict, standardizedProductNutrientDict):
 	labeledData = dict()
 	yFilename = "productLabelsY.json"
 	xFilename = "productNutrientValuesX.json"
-	hyperParameter = 1
+	hyperParameter = 0.20
 
 	for productID, score in productScoresDict.items():
 		if abs(score) < hyperParameter:
