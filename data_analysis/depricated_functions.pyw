@@ -2,6 +2,9 @@
 Depricated Functions to be used in data_analysis.py
 """
 
+import DatabaseFunctions
+import DataCollectionFunctions
+
 def plot_nutrients(python_database, x_code, color = None):
 	x_val_list = []
 	need_label = True
@@ -203,7 +206,7 @@ def make_nutrient_frequency_file(python_database, nutrient_codes):
 		nutrient_frequency_list.append([key, value])
 
 	nutrient_frequency_list = sorted(nutrient_frequency_list, key = lambda nutrient_frequency_list: nutrient_frequency_list[1], reverse = True)
-	writeJSON(nutrient_frequency_list, "nutrient_frequency_list.JSON")
+	DatabaseFunctions.writeJSON(nutrient_frequency_list, "nutrient_frequency_list.JSON")
 
 def make_adjusted_nutrient_code_file():
 	nutrient_frequency_list = sorted(readJSON("nutrient_frequency_list.JSON"), key = lambda nutrient_frequency_list: nutrient_frequency_list[0])

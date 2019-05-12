@@ -1,17 +1,15 @@
 from product import Product, Nutrient
 import DataCollectionFunctions
 import DatabaseFunctions
+import depricated_functions
 
 pythonDatabaseFilename = "nutrition_database.json"
 nutrientCodesFilename = "nutrient_codes.txt"
-
-def main():
-	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON(pythonDatabaseFilename))
-	nutrientCodes = DatabaseFunctions.getNutrientCodesList(nutrientCodesFilename)
 	
+def dataCollection(pythonDatabase, nutrientCodes):
 	nutrientValueDict = DataCollectionFunctions.getNutrientValueDict(pythonDatabase)
 
-	nutrientRelationshipsDict = DataCollectionFunctions.readNutrientRelationships("")
+	nutrientRelationshipsDict = DataCollectionFunctions.readNutrientRelationships()
 
 	idealValuesDict = DataCollectionFunctions.getSuggestedIntakes("male", 22, "very active")
 
@@ -25,12 +23,22 @@ def main():
 
 	DataCollectionFunctions.writeProductScores(productScoresDict, standardizedProductNutrientDict)
 
-	DataCollectionFunctions.printBestScores(productScoresDict, pythonDatabase)
+	DataCollectionFunctions.printBestScores(productScoresDict, pythonDatabase, 2300)
 
 	X, Y = DataCollectionFunctions.loadSvmData()
 
-	for i in range(10):
-		print str(Y[i]) + ": " + str(X[i])
+def main():
+	#pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON(pythonDatabaseFilename))
+	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON("convertedDatabase.json"))
+	#depricated_functions.make_nutrient_frequency_file(pythonDatabase, DatabaseFunctions.getNutrientCodesList("usedNutrientCodes.txt"))
+	pythonDatabase = DatabaseFunctions.randomSample(pythonDatabase, 0.01)
+	nutrientCodes = DatabaseFunctions.getNutrientCodesList(nutrientCodesFilename)
+	
+	#DatabaseFunctions.performUnitConversionsOnDatabase(pythonDatabase)
+
+	dataCollection(pythonDatabase, nutrientCodes)
 
 if __name__ == '__main__':
 	main()
+
+	
