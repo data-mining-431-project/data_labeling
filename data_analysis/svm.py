@@ -3,6 +3,8 @@ import json
 import pandas as pd
 import numpy as np
 
+import DataCollectionFunctions
+
 from sklearn.linear_model import LogisticRegression
 from sklearn import svm
 #import pylab as pl
@@ -41,19 +43,9 @@ def getSuggestedIntakes(nutrientCodes):
 def svmprac():
 	X = []
 	y = []
-	labelFile = open("productLabelsY.json","r+")
-
-	for label in labelFile:
-		label = json.dumps(label)
-		y.append(label)
-	labelFile.close()
-
-
-	productNutrientsSTD = open("productNutrientValuesX.json","r+")
-	for eachProduct in productNutrientsSTD:
-		eachProduct = json.loads(eachProduct)
-		X.append(eachProduct)
-	productNutrientsSTD.close()
+	X, y = DataCollectionFunctions.loadSvmData()
+	X = np.array(X)
+	y = np.array(y)
 
 #general
 	#clf = svm.SVC(kernel='linear',C=1, probability=True).fit(X, y)
@@ -78,8 +70,7 @@ def svmprac():
 	lr.fit(X,y)
 #prediction
 	test = []
-
-file = open("predictTest.json","r+")
+	file = open("predictTest.json","r+")
 	for tx in file:
 		test.append(json.loads(tx))
 	testX = []
