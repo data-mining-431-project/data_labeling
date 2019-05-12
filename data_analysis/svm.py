@@ -44,16 +44,15 @@ def svmprac():
 	X = []
 	y = []
 	X, y = DataCollectionFunctions.loadSvmData()
-	X = np.array(X)
-	y = np.array(y)
 
 #general
 	#clf = svm.SVC(kernel='linear',C=1, probability=True).fit(X, y)
 
 #svm - 10 folder cross validation
-	svc = svm.SVC(kernel='linear')
+	svc = svm.SVC(kernel = 'linear')
 	Cs = range(1, 20)
 	clf = GridSearchCV(estimator=svc, param_grid=dict(C=Cs), cv = 10)
+	#clf = svm.SVC(kernel = 'linear', C=13)
 	clf.fit(X, y)
 
 #w values
@@ -62,12 +61,14 @@ def svmprac():
 #b values
 	print clf.best_estimator_.intercept_
 #estimated C
-#	print clf.best_params_
+#	
 	print("Accuracy: %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
+	print "The estimated C after the grid search for 10 fold cross validation: "
+	print clf.best_params_
 
 #logistic regression 
-	lr = LogisticRegression()
-	lr.fit(X,y)
+	#lr = LogisticRegression()
+	#lr.fit(X,y)
 #prediction
 	test = []
 	file = open("predictTest.json","r+")
@@ -81,19 +82,17 @@ def svmprac():
 		testX.append(temp)
 
 	CVtestY = clf.predict(testX)
-	LRtestY = lr.predict(testX)
-	#print CVtestY
-	#print LRtestY
-	CVcounter = 0
-	for arr in CVtestY:
-		Ynum1 = int(arr[1])
-		CVcounter = CVcounter + Ynum1
-	LRcounter = 0
-	for arr in LRtestY:
-		Ynum2 = int(arr[1])
-		LRcounter = LRcounter + Ynum2	
-	print "total number of testing nutrients by Cross Validation: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(CVtestY), CVcounter, len(CVtestY) - CVcounter)
-	print "total number of testing nutrients by Logistic Regression: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(LRtestY), LRcounter, len(LRtestY) - LRcounter)
+
+	testY = []
+	file = open("testLabels.json","r+")
+	for tx in file:
+		testY.append(json.loads(tx))
+	
+	clf.score(testX, testY)
+
+	for i in range(len(test)):
+		print "%2d | %2d" % (CVtestY[i], test[i])
+	
 '''
 	predictedFile = open("predictedProduct.json","w+")
 	pred = []

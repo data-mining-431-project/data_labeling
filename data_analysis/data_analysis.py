@@ -31,7 +31,8 @@ def main():
 	#pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON(pythonDatabaseFilename))
 	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON("convertedDatabase.json"))
 	#depricated_functions.make_nutrient_frequency_file(pythonDatabase, DatabaseFunctions.getNutrientCodesList("usedNutrientCodes.txt"))
-	#pythonDatabase = DatabaseFunctions.randomSample(pythonDatabase, 0.01)
+	
+	pythonDatabase = DatabaseFunctions.randomSample(pythonDatabase, 0.15)
 	nutrientCodes = DatabaseFunctions.getNutrientCodesList(nutrientCodesFilename)
 	
 	#DatabaseFunctions.performUnitConversionsOnDatabase(pythonDatabase)

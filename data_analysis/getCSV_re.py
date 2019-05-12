@@ -78,7 +78,7 @@ def svmprac():
 	bestParaDict = clf.best_params_
 	print bestParaDict
 	print("Accuracy: %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
-	#print clf.param_grid
+	print clf.param_grid
 
 #logistic regression 
 	lr = LogisticRegression()
