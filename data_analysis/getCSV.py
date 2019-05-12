@@ -14,9 +14,6 @@ from sklearn.model_selection import GridSearchCV
 	#save into a dictionary, key: nutrient id, value: ideal value
 	#return idealValueDict
 	#a dict with all id and {203, 123.4},{...}
-#normal - if
-#lessThanBad - elif - if std < 0, 
-#moreThanBad - 
 '''
 '''
 def getSuggestedIntakes(nutrientCodes):
@@ -35,7 +32,6 @@ def getSuggestedIntakes(nutrientCodes):
 					nID = nutrientCodes[0,2] 
 					idealValuesDict[nID] = idealIntake
 		#suggested = refIntakes[nutr][yr]
-
 	return idealValuesDict
 '''
 
@@ -47,58 +43,65 @@ def svmprac():
 	y = []
 	labelFile = open("productLabelsY.json","r+")
 
-	
 	for label in labelFile:
-		label = json.loads(label)
+		label = json.dumps(label)
 		y.append(label)
 	labelFile.close()
+
 
 	productNutrientsSTD = open("productNutrientValuesX.json","r+")
 	for eachProduct in productNutrientsSTD:
 		eachProduct = json.loads(eachProduct)
 		X.append(eachProduct)
 	productNutrientsSTD.close()
+
 #general
 	#clf = svm.SVC(kernel='linear',C=1, probability=True).fit(X, y)
 
 #svm - 10 folder cross validation
 	svc = svm.SVC(kernel='linear')
 	Cs = range(1, 20)
-	print "still working?"
 	clf = GridSearchCV(estimator=svc, param_grid=dict(C=Cs), cv = 10)
-	print "test1?"
-	'''
 	clf.fit(X, y)
-	print "test2?"
-	print clf.best_estimator_.coef_
-	print "test3?"
 
+#w values
+	Wvalues = clf.best_estimator_.coef_
+	print Wvalues
+#b values
 	print clf.best_estimator_.intercept_
+#estimated C
+#	print clf.best_params_
 	print("Accuracy: %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
-	print "The estimated C after the grid search for 10 fold cross validation \n(best parameters): "
-	print clf.best_params_
 
-	'''
 #logistic regression 
-'''
 	lr = LogisticRegression()
 	lr.fit(X,y)
-'''
-
 #prediction
 	test = []
-	for line in open("predictTest.json").readlines():
-		test.append(line)
-
+	file = open("predictTest.json","r+")
+	for tx in file:
+		test.append(json.loads(tx))
 	testX = []
-	for productNutri in testX:
-		testX.append(productNutri)
+	for productNutri in test:
+		temp = []
+		for n in productNutri:
+			temp.append(float(n))
+		testX.append(temp)
 
-#	CVtestY = clf.predict(testX)
-#	LRtestY = lr.predict(testX)
-#	print "The total number of testing tweets by Cross Validation: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(CVtestY), sum(CVtestY), len(CVtestY) - sum(CVtestY))
-#	print "									  by Logistic Regression: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(LRtestY), sum(LRtestY), len(LRtestY) - sum(LRtestY))
-
+	CVtestY = clf.predict(testX)
+	LRtestY = lr.predict(testX)
+	#print CVtestY
+	#print LRtestY
+	CVcounter = 0
+	for arr in CVtestY:
+		Ynum1 = int(arr[1])
+		CVcounter = CVcounter + Ynum1
+	LRcounter = 0
+	for arr in LRtestY:
+		Ynum2 = int(arr[1])
+		LRcounter = LRcounter + Ynum2	
+	print "total number of testing nutrients by Cross Validation: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(CVtestY), CVcounter, len(CVtestY) - CVcounter)
+	print "total number of testing nutrients by Logistic Regression: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(LRtestY), LRcounter, len(LRtestY) - LRcounter)
 '''
 	predictedFile = open("predictedProduct.json","w+")
 	pred = []
@@ -107,9 +110,8 @@ def svmprac():
 			pred.append(str(label)+","+str(each))
 	for line in pred:
 		predictedFile.write(line)
-'''
 #get score from SVM, try graph
-
+'''
 
 def main():
 	svmprac()
