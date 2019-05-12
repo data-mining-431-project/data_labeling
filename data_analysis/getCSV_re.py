@@ -1,5 +1,7 @@
 # coding: utf-8
 from __future__ import division
+from sklearn.datasets import load_iris
+
 import json
 import pandas as pd
 import numpy as np
@@ -11,6 +13,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
+
 
 
 #getting value with assigned age among each nutrient from Dietary_Reference_Intakes table
@@ -59,13 +63,13 @@ def svmprac():
 		eachProduct = json.loads(eachProduct)
 		X.append(eachProduct)
 	productNutrientsSTD.close()
-	print X
+	#print X
 #general
 	#clf = svm.SVC(kernel='linear',C=1, probability=True).fit(X, y)
 
 #svm - 10 folder cross validation
 	svc = svm.SVC(kernel='linear')
-	Cs = range(1,30)
+	Cs = range(1,20)
 	clf = GridSearchCV(estimator=svc, param_grid=dict(C=Cs), cv = 10)
 	clf.fit(X, y)
 
@@ -73,12 +77,13 @@ def svmprac():
 	Wvalues = clf.best_estimator_.coef_
 	print Wvalues
 #estimated b values
-	print clf.best_estimator_.intercept_
+	bvalue = clf.best_estimator_.intercept_
+	print bvalue
 #best parameters 
 	bestParaDict = clf.best_params_
 	print bestParaDict
 	print("Accuracy: %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
-	print clf.param_grid
+	#print clf.param_grid
 
 #logistic regression 
 	lr = LogisticRegression()
@@ -113,20 +118,67 @@ def svmprac():
 #get score from SVM, try graph
 #achieve best parameters
 	bestW = Wvalues[bestParaDict['C']-1]
+	bestW = bestW.tolist()
 	print bestW
+
 	#1/sqrt(w*w)
 	bestb = bvalue[bestParaDict['C']-1]
 
-	distance = lambda x: ((x* + bestb)/(math.sqrt(x*x))) if x!=0 else 0
-	func = np.vectorize(distance)		
-	score = func(bestW)
-	print score
+	sumtop = 0
+	sumbottom = 0
+	counter = []
+	frameVal = []
+	n = 0
 	for eachProduct in X:
+		counter.append(n) 
+		n += 1
+		for i in range(len(eachProduct)):
+			sumtop = sumtop + (eachProduct[i]*bestW[i])
+			summulti = bestW[i]*bestW[i]
+			sumbottom += summulti
+		topCalc = abs(sumtop + bestb)
+		bottomCalc = math.sqrt(sumbottom)
+		distance = topCalc/bottomCalc 
+		frameVal.append(distance)
+
+		#print distance
+		#Correlation matrix plot
+	#data= load_iris()
+	#print data
+	#df= pd.DataFrame(data= data['data'], columns= data['feature_names'])
+
+	df = pd.DataFrame(data=X)#list(zip(X)))
+	plt.matshow(df.corr())
+	plt.colorbar()
+	plt.title('Correlation matrix plot')
+	plt.ylabel(df.columns.values,fontsize=10)
+	plt.xlabel(df.columns.values,fontsize=10)
+#	plt.show()
+
+
+	df1 = pd.DataFrame(data=frameVal)
+	plt.figure()
+
+	sns.set_style('darkgrid')
+	sns.distplot(df1,hist=False)
+	plt.title("Probability Distribution")
+	plt.ylabel("Probabilities")
+	plt.xlabel("Scores")
+	plt.show()
+
+'''
+	distance = lambda x,y: (abs(x*y + bestb)/(math.sqrt(x*x))) if x!=0 else 0
+
+	dataValue = []
+	for eachProduct in X:
+		func = np.vectorize(distance)	
+		score = func(bestW,eachProduct)
+		score = score.tolist()
+		print score
 
 
 	#Convert to dataframe
 	#for 
-'''
 	#Correlation matrix plot
 	data = pd.read(score)
 	plt.figure()
