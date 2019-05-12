@@ -7,7 +7,7 @@ import DatabaseFunctions
 import pandas as pd
 import numpy as np
 
-def readUsedNutrientCodes(filename = "used_nutrient_codes.txt"):
+def readUsedNutrientCodes(filename = "usedNutrientCodes.txt"):
 	nutrientCodes = []
 	f = open(filename)
 	for line in f.readlines():
@@ -37,7 +37,7 @@ def getNutrientValueDict(pythonDatabase):
 
 	return nutrientValueDict
 
-def readNutrientRelationships(filename):
+def readNutrientRelationships(filename = "NutrientRelationshipFile.txt"):
 	# Read in the nutrient relationship data
 	# assemble into a dictionary of the form
 	# nutrientID : flag
@@ -199,9 +199,14 @@ def getProductScores(standardizedProductNutrientDict):
 	for productID, nutrientDict in standardizedProductNutrientDict.items():
 		score = 0
 		for nutrientID, nutrientValue in nutrientDict.items():
-			score += nutrientValue
-		productScoresDict[productID] = score
-		#productScoresDict[productID] = score/len(nutrientDict)
+			# Added Sugars have increased weight because they're extra bad
+			if nutrientID == "539":
+				score += 2*nutrientValue
+			# All other nutrients
+			else:
+				score += nutrientValue
+		#productScoresDict[productID] = score
+		productScoresDict[productID] = score/len(nutrientDict)
 
 	print "Done\n"
 
@@ -218,7 +223,7 @@ def writeProductScores(productScoresDict, standardizedProductNutrientDict):
 	labeledData = dict()
 	yFilename = "productLabelsY.json"
 	xFilename = "productNutrientValuesX.json"
-	hyperParameter = 1
+	hyperParameter = 0.2
 
 	for productID, score in productScoresDict.items():
 		if abs(score) < hyperParameter:
@@ -271,8 +276,7 @@ def loadSvmData():
 	return X, Y
 	# X, Y = loadSvmData()
 
-def printBestScores(productScoresDict, pythonDatabase):
-	numScoresToPrint = 200
+def printBestScores(productScoresDict, pythonDatabase, numScoresToPrint = 100):
 	sortedProductScoresList = []
 
 	for productID, score in productScoresDict.items():
@@ -280,4 +284,7 @@ def printBestScores(productScoresDict, pythonDatabase):
 	sortedProductScoresList = sorted(sortedProductScoresList, key=lambda product: product[1])
 
 	for i in range(numScoresToPrint):
-		print "%100s | %8d | %3.4f" % (pythonDatabase[sortedProductScoresList[i][0]].name, sortedProductScoresList[i][0], sortedProductScoresList[i][1])
+		try:
+			print "%100s | %8d | %3.4f" % (pythonDatabase[sortedProductScoresList[i][0]].name, sortedProductScoresList[i][0], sortedProductScoresList[i][1])
+		except:
+			pass
