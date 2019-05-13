@@ -159,12 +159,19 @@ def svmprac():
 	df1 = pd.DataFrame(data=frameVal)
 	plt.figure()
 
-	sns.set_style('darkgrid')
+	plt.xlim(0,20)
 	sns.distplot(df1,hist=False)
 	plt.title("Probability Distribution")
 	plt.ylabel("Probabilities")
 	plt.xlabel("Scores")
 	plt.show()
+
+	plt.figure()
+	plt.boxplot(frameVal)
+	plt.title("Score Range Distirbution")
+	plt.show()
+
+
 
 '''
 	distance = lambda x,y: (abs(x*y + bestb)/(math.sqrt(x*x))) if x!=0 else 0
