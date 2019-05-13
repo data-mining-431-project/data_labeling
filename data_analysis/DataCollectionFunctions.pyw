@@ -6,6 +6,8 @@ import math
 import DatabaseFunctions
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def readUsedNutrientCodes(filename = "usedNutrientCodes.txt"):
 	nutrientCodes = []
@@ -201,10 +203,10 @@ def getProductScores(standardizedProductNutrientDict):
 		for nutrientID, nutrientValue in nutrientDict.items():
 			# Added Sugars have increased weight because they're extra bad
 			if nutrientID == "539":
-				score += 2*nutrientValue
+				score += 2*abs(nutrientValue)
 			# All other nutrients
 			else:
-				score += nutrientValue
+				score += abs(nutrientValue)
 		#productScoresDict[productID] = score
 		productScoresDict[productID] = score/len(nutrientDict)
 
@@ -288,3 +290,14 @@ def printBestScores(productScoresDict, pythonDatabase, numScoresToPrint = 100):
 			print "%100s | %8d | %3.4f" % (pythonDatabase[sortedProductScoresList[i][0]].name, sortedProductScoresList[i][0], sortedProductScoresList[i][1])
 		except:
 			pass
+
+def plotPDF(productScoresDict):
+	df = pd.DataFrame(data=np.array(productScoresDict.values()))
+	plt.figure()
+
+	sns.set_style('darkgrid')
+	sns.distplot(df,hist=False)
+	plt.title("Probability Distribution")
+	plt.ylabel("Probabilities")
+	plt.xlabel("Scores")
+	plt.show()
