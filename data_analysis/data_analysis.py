@@ -21,9 +21,9 @@ def dataCollection(pythonDatabase, nutrientCodes):
 
 	productScoresDict = DataCollectionFunctions.getProductScores(standardizedProductNutrientDict)
 
-	DataCollectionFunctions.plotPDF(productScoresDict)
+	#DataCollectionFunctions.plotPDF(productScoresDict)
 
-	#DataCollectionFunctions.writeProductScores(productScoresDict, standardizedProductNutrientDict)
+	DataCollectionFunctions.writeProductScores(productScoresDict, standardizedProductNutrientDict)
 
 	#DataCollectionFunctions.printBestScores(productScoresDict, pythonDatabase, 2300)
 
@@ -34,7 +34,7 @@ def main():
 	pythonDatabase = DatabaseFunctions.convertFromJson(DatabaseFunctions.readJSON("convertedDatabase.json"))
 	#depricated_functions.make_nutrient_frequency_file(pythonDatabase, DatabaseFunctions.getNutrientCodesList("usedNutrientCodes.txt"))
 	
-	#pythonDatabase = DatabaseFunctions.randomSample(pythonDatabase, 0.15)
+	pythonDatabase = DatabaseFunctions.randomSample(pythonDatabase, 0.50)
 	nutrientCodes = DatabaseFunctions.getNutrientCodesList(nutrientCodesFilename)
 	
 	#DatabaseFunctions.performUnitConversionsOnDatabase(pythonDatabase)
