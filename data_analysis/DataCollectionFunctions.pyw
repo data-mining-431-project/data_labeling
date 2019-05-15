@@ -225,7 +225,9 @@ def writeProductScores(productScoresDict, standardizedProductNutrientDict):
 	labeledData = dict()
 	yFilename = "productLabelsY.json"
 	xFilename = "productNutrientValuesX.json"
-	hyperParameter = 0.2
+
+	scores = sorted(productScoresDict.values())
+	hyperParameter = scores[len(scores)/2]
 
 	for productID, score in productScoresDict.items():
 		if abs(score) < hyperParameter:
@@ -300,4 +302,5 @@ def plotPDF(productScoresDict):
 	plt.title("Probability Distribution")
 	plt.ylabel("Probabilities")
 	plt.xlabel("Scores")
+	plt.xlim(0, 20)
 	plt.show()

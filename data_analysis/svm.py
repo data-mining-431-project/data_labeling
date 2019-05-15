@@ -49,22 +49,22 @@ def svmprac():
 	#clf = svm.SVC(kernel='linear',C=1, probability=True).fit(X, y)
 
 #svm - 10 folder cross validation
-	svc = svm.SVC(kernel = 'linear')
-	Cs = range(1, 20)
-	clf = GridSearchCV(estimator=svc, param_grid=dict(C=Cs), cv = 10)
-	#clf = svm.SVC(kernel = 'linear', C=13)
+	#svc = svm.SVC(kernel = 'linear')
+	#Cs = range(1, 20)
+	#clf = GridSearchCV(estimator=svc, param_grid=dict(C=Cs), cv = 10)
+	clf = svm.SVC(kernel = 'linear', C=1)
 	clf.fit(X, y)
 
 #w values
-	Wvalues = clf.best_estimator_.coef_
-	print Wvalues
+	#Wvalues = clf.best_estimator_.coef_
+	#print Wvalues
 #b values
-	print clf.best_estimator_.intercept_
+	#print clf.best_estimator_.intercept_
 #estimated C
 #	
-	print("Accuracy: %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
-	print "The estimated C after the grid search for 10 fold cross validation: "
-	print clf.best_params_
+	#print("Accuracy: %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
+	#print "The estimated C after the grid search for 10 fold cross validation: "
+	#print clf.best_params_
 
 #logistic regression 
 	#lr = LogisticRegression()
@@ -88,7 +88,7 @@ def svmprac():
 	for tx in file:
 		testY.append(json.loads(tx))
 	
-	clf.score(testX, testY)
+	print clf.score(testX, testY)
 
 	for i in range(len(test)):
 		print "%2d | %2d" % (CVtestY[i], test[i])
