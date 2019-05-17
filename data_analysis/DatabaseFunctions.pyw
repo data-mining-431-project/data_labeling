@@ -103,25 +103,32 @@ def getNutrientCodesList(fileName):
 	return codeList
 
 # Takes a Random Sample of the database
-def randomSample(python_database, sample_percent):
-	number_of_samples = 0
-	sub_python_database = dict()
-	keys = python_database.keys()
-	total_items = sample_percent*len(python_database)
-	items_processed = 0.0
-	print "Getting Random Sample..."
-	
-	random.shuffle(keys)
-	for i in range(int(sample_percent*len(python_database))):
-		sub_python_database[keys[i]] = python_database[keys[i]]
-		# Progress Indicator
-		items_processed = items_processed + 1
-		progress_percent = (items_processed/total_items)*100.0
-		if items_processed%1000 == 0:
-			print ("%05.2f%%" % progress_percent)
+def randomSample(pythonDatabase, distributionList):
+	totalItems = 0
+	for percentage in distributionList:
+		totalItems += percentage*len(pythonDatabase)
+	itemsProcessed = 0.0
 
+	databaseList = []
+	keys = pythonDatabase.keys()
+	random.shuffle(keys)
+	k = 0
+
+	print "Getting Random Sample..."
+	for i in range(len(distributionList)):
+		subPythonDatabase = dict()
+		for j in range(int(distributionList[i]*len(pythonDatabase))):
+			subPythonDatabase[keys[k+j]] = pythonDatabase[keys[k+j]]
+			# Progress Indicator
+			itemsProcessed = itemsProcessed + 1
+			progressPercent = (itemsProcessed/totalItems)*100.0
+			if itemsProcessed%10000 == 0:
+				print ("%05.2f%%" % progressPercent)
+		k += int(distributionList[i]*len(pythonDatabase))
+		databaseList.append(subPythonDatabase)
 	print "Done\n"
-	return sub_python_database
+
+	return databaseList
 
 def printDatabase(python_database):
 	for id, product in pythonDatabase.items():

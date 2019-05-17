@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>c2d27d0b-31e6-4301-9538-99625c1bdbbf</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>svm.py</StartupFile>
+    <StartupFile>data_analysis.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,12 +22,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CompareProducts.pyw" />
     <Compile Include="DatabaseFunctions.pyw" />
     <Compile Include="DataCollectionFunctions.pyw" />
     <Compile Include="data_analysis.py" />
-    <Compile Include="svm.py" />
+    <Compile Include="logit.pyw" />
     <Compile Include="MacFunctions.pyw" />
     <Compile Include="product.pyw" />
+    <Compile Include="svm.pyw" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="all_nutrient_codes.txt" />
