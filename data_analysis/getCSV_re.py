@@ -63,13 +63,13 @@ def svmprac():
 		eachProduct = json.loads(eachProduct)
 		X.append(eachProduct)
 	productNutrientsSTD.close()
-	#print X
+
 #general
 	#clf = svm.SVC(kernel='linear',C=1, probability=True).fit(X, y)
 
 #svm - 10 folder cross validation
 	svc = svm.SVC(kernel='linear')
-	Cs = range(1,20)
+	Cs = range(1,100)
 	clf = GridSearchCV(estimator=svc, param_grid=dict(C=Cs), cv = 10)
 	clf.fit(X, y)
 
@@ -82,12 +82,13 @@ def svmprac():
 #best parameters 
 	bestParaDict = clf.best_params_
 	print bestParaDict
-	print("Accuracy: %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
+	print("Accuracy of : %0.2f (+/- %0.2f)" % (clf.best_estimator_.coef_.mean(), clf.best_estimator_.coef_.std() * 2))
 	#print clf.param_grid
 
 #logistic regression 
 	lr = LogisticRegression()
 	lr.fit(X,y)
+
 #prediction
 	test = []
 	file = open("predictTest.json","r+")
@@ -102,8 +103,7 @@ def svmprac():
 
 	CVtestY = clf.predict(testX)
 	LRtestY = lr.predict(testX)
-	#print CVtestY
-	#print LRtestY
+
 	CVcounter = 0
 	for arr in CVtestY:
 		Ynum1 = int(arr[1])
@@ -115,13 +115,20 @@ def svmprac():
 	print "total number of testing nutrients by Cross Validation: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(CVtestY), CVcounter, len(CVtestY) - CVcounter)
 	print "total number of testing nutrients by Logistic Regression: {} ({} are predicted as positives, {} are predicted as negatives)".format(len(LRtestY), LRcounter, len(LRtestY) - LRcounter)
 
+	testY = []
+	tY = open("shouldPredictY.json","r+")
+	for i in tY:
+		testY.append(json.loads(i))
+	print('Accuracy of SVM by score method: {:.2f}'.format(clf.score(testX, testY)))
+	print('Accuracy of logistic regression by score method: {:.2f}'.format(lr.score(testX, testY)))
+
 #get score from SVM, try graph
 #achieve best parameters
 	bestW = Wvalues[bestParaDict['C']-1]
 	bestW = bestW.tolist()
 	print bestW
 
-	#1/sqrt(w*w)
+#distance calculation
 	bestb = bvalue[bestParaDict['C']-1]
 
 	sumtop = 0
@@ -140,12 +147,6 @@ def svmprac():
 		bottomCalc = math.sqrt(sumbottom)
 		distance = topCalc/bottomCalc 
 		frameVal.append(distance)
-
-		#print distance
-		#Correlation matrix plot
-	#data= load_iris()
-	#print data
-	#df= pd.DataFrame(data= data['data'], columns= data['feature_names'])
 
 	df = pd.DataFrame(data=X)#list(zip(X)))
 	plt.matshow(df.corr())
@@ -173,29 +174,8 @@ def svmprac():
 
 
 
+
 '''
-	distance = lambda x,y: (abs(x*y + bestb)/(math.sqrt(x*x))) if x!=0 else 0
-
-	dataValue = []
-	for eachProduct in X:
-		func = np.vectorize(distance)	
-		score = func(bestW,eachProduct)
-		score = score.tolist()
-		print score
-
-
-	#Convert to dataframe
-	#for 
-	#Correlation matrix plot
-	data = pd.read(score)
-	plt.figure()
-	plt.title('Correlation matrix plot')
-	plt.matshow(data.corr())
-	plt.colorbar()
-	plt.ylabel(data.columns.values,fontsize=5)
-	plt.xlabel(data.columns.values,fontsize=5)
-	plt.show()
-
 	predictedFile = open("predictedProduct.json","w+")
 	pred = []
 	for label in testY:
