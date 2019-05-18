@@ -61,7 +61,6 @@ def readNutrientRelationships(filename = "NutrientRelationshipFile.txt"):
 	return nutrientRelationshipsDict
 
 def getSuggestedIntakes(gender, age, activity):
-	# Zurui
 	# adjustedIdealValue = (idealValue/day) / (suggestedCaloricIntake/day)
 	# process into a dictionary of the form
 	# nutrinetID : adjustedIdealValue
@@ -107,9 +106,9 @@ def getSuggestedIntakes(gender, age, activity):
 	dailyNutrientsList = nutrientIntakes.values.tolist()
 	dailyNutrients = dailyNutrientsList[nutrientAge-2][0].split(';')
 
-	idealValuesDict = dict()
+	recommendedValuesDict = dict()
 	for i in range(len(nutrientCodes)):
-		idealValuesDict[nutrientCodes[i]] = float(dailyNutrients[i])/float(dailyCalories)
+		recommendedValuesDict[nutrientCodes[i]] = float(dailyNutrients[i])/float(dailyCalories)
 
 	print "Done"
 	
@@ -125,26 +124,26 @@ def getSuggestedIntakes(gender, age, activity):
 	#				nID = nutrientCodes[n] 
 	#				idealValuesDict[nID] = idealIntake
 
-	return idealValuesDict
+	return recommendedValuesDict
 
-def getIdealValueDeviationDict(nutrientValueDict, idealValuesDict):
+def getRecommendedValueDeviationDict(nutrientValueDict, idealValuesDict):
 	# Calculate the deviation from the ideal value: sigma
 	# Calculate deviation for all values and return a dict of the form
 	# nutrientID : idealValueDeviation
 
 	print "Calculating and Assembling the Deviation from the Ideal Value Dictionary..."
 
-	idealValueDeviationDict = dict()
+	recommendedValueDeviationDict = dict()
 
 	for nutrientID in idealValuesDict.keys():
 		squaredSum = 0
 		for nutrientValue in nutrientValueDict[nutrientID]:
 			squaredSum+=(nutrientValue-idealValuesDict[nutrientID])**2
-		idealValueDeviationDict[nutrientID] = math.sqrt(squaredSum/len(nutrientValueDict[nutrientID]))
+		recommendedValueDeviationDict[nutrientID] = math.sqrt(squaredSum/len(nutrientValueDict[nutrientID]))
 
 	print "Done"
 
-	return idealValueDeviationDict
+	return recommendedValueDeviationDict
 
 def getProductNutrientDict(pythonDatabase, nutrientRelationshipsDict, idealValuesDict):
 	# productNutrientDict dict of form
@@ -192,27 +191,27 @@ def convertDataToStandardUnits(idealValuesDict, idealValueDeviationDict, product
 
 	return standardizedProductNutrientDict
 
-def getProductScores(standardizedProductNutrientDict):
+def getAvgNutrDevDict(standardizedProductNutrientDict):
 
 	print "Calculating Product Scores and Assembling Product Scores Dictionary..."
 
-	productScoresDict = dict()
+	avgNutrDevDict = dict()
 	
 	for productID, nutrientDict in standardizedProductNutrientDict.items():
 		score = 0
 		for nutrientID, nutrientValue in nutrientDict.items():
 			score += abs(nutrientValue)
 		#productScoresDict[productID] = score
-		productScoresDict[productID] = score/len(nutrientDict)
+		avgNutrDevDict[productID] = score/len(nutrientDict)
 
 	print "Done"
 
-	return productScoresDict
+	return avgNutrDevDict
 
 def getX():
 	DatabaseFunctions.getNutrientCodesList()
 
-def writeProductScores(productScoresDict, productNutrientDict, xFilename, yFilename, pFilename = None):
+def writeProductLabels(avgNutrDevDict, productNutrientDict, xFilename, yFilename, pFilename = None):
 	# write a json file with format:
 	# 0, productID
 	# 1, productID
@@ -222,11 +221,11 @@ def writeProductScores(productScoresDict, productNutrientDict, xFilename, yFilen
 	
 	labeledData = dict()
 
-	scores = sorted(productScoresDict.values())
-	hyperParameter = scores[len(scores)/2]
+	avgNutrDevSortedList = sorted(avgNutrDevDict.values())
+	hyperParameter = avgNutrDevSortedList[len(avgNutrDevSortedList)/2]
 
-	for productID, score in productScoresDict.items():
-		if abs(score) < hyperParameter:
+	for productID, avgNutrDev in avgNutrDevDict.items():
+		if abs(avgNutrDev) < hyperParameter:
 			labeledData[productID] = 1
 		else:
 			labeledData[productID] = 0
@@ -280,10 +279,10 @@ def loadData(xFilename, yFilename):
 	return X, Y
 	# X, Y = loadSvmData()
 
-def printBestScores(productScoresDict, pythonDatabase, numScoresToPrint = 100):
+def printBestDev(avgNutrDevDict, pythonDatabase, numScoresToPrint = 100):
 	sortedProductScoresList = []
 
-	for productID, score in productScoresDict.items():
+	for productID, score in avgNutrDevDict.items():
 		sortedProductScoresList.append([productID, abs(score)])
 	sortedProductScoresList = sorted(sortedProductScoresList, key=lambda product: product[1])
 
@@ -293,14 +292,14 @@ def printBestScores(productScoresDict, pythonDatabase, numScoresToPrint = 100):
 		except:
 			pass
 
-def plotPDF(productScoresDict):
-	df = pd.DataFrame(data=np.array(productScoresDict.values()))
+def plotPDF(avgNutrDevDict):
+	df = pd.DataFrame(data=np.array(avgNutrDevDict.values()))
 	plt.figure()
 
 	sns.set_style('darkgrid')
 	sns.distplot(df,hist=False)
 	plt.title("Probability Distribution")
 	plt.ylabel("Probabilities")
-	plt.xlabel("Scores")
+	plt.xlabel("Average Nutrient Deviations")
 	plt.xlim(0, 20)
 	plt.show()

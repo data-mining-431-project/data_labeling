@@ -19,8 +19,8 @@ def trainsvm(filenames):
 	crossX, crossY = DataCollectionFunctions.loadData(crossXfilename, crossYfilename)
 	#svm - 10 folder cross validation
 	crossModel = svm.SVC(kernel = 'linear')
-	Cs = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-	for i in range(1,10):
+	Cs = range(20,31)
+	for i in [40, 50, 60, 70, 80, 90, 100]:
 		Cs.append(i)
 	crossModel = GridSearchCV(estimator=crossModel, param_grid=dict(C=Cs), n_jobs = 1, cv = 3, verbose = 10)
 	print "Performing Cross Validation..."
@@ -32,30 +32,25 @@ def trainsvm(filenames):
 	#b values
 	#print gridSearchModel.best_estimator_.intercept_
 	#estimated C
-	print("Accuracy: %0.2f (+/- %0.2f)" % (crossModel.best_estimator_.coef_.mean(), crossModel.best_estimator_.coef_.std() * 2))
 	print "The estimated C after the grid search for 10 fold cross validation: "
 	crossModelParameter = crossModel.best_params_
 	print crossModelParameter
 	print
 
 	# Train Actual Model
-	testX, testY = DataCollectionFunctions.loadData(testXfilename, testYfilename)
-	model = svm.SVC(kernel = 'linear', C=crossModelParameter['C'])
+	trainX, trainY = DataCollectionFunctions.loadData(trainXfilename, trainYfilename)
+	model = svm.SVC(kernel = 'linear', C=crossModelParameter['C'], verbose = True)
 
 	print "Training Model..."
-	model.fit(testX, testY)
+	model.fit(trainX, trainY)
 	print "Done\n"
 
 	# Prediction
-	testX, testY = DataCollectionFunctions.loadData("testX.json", "testY.json")
+	testX, testY = DataCollectionFunctions.loadData(testXfilename, testYfilename)
 	print("Model Accuracy: %0.2f\n" % (100*model.score(testX, testY)))
 
 	# Save Model
-	saveModel(model, "svmModel.joblib")
-
-	# Load Model
-	#LoadedModel = loadModel()
-	#print("Loaded Model Accuracy: %0.2f\n" % (100*loadedModel.score(testX, testY)))
+	saveModel(model, "newSvmModel.joblib")
 
 def saveModel(model, filename):
 	# Save Model
@@ -69,6 +64,11 @@ def loadModel(filename):
 	model = joblib.load(filename)
 	print "Done\n"
 	return model
+
+def testModel(filename, testXfilename, testYfilename):
+	testModel = loadModel(filename)
+	testX, testY = DataCollectionFunctions.loadData(testXfilename, testYfilename)
+	print("Test Model Accuracy: %0.2f\n" % (100*testModel.score(testX, testY)))
 
 def getScores(model, X):
 	# Get Scores

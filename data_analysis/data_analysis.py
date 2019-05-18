@@ -11,13 +11,13 @@ pythonDatabaseFilename = "convertedDatabase.json"
 def getLabels(database, xFilename, yFilename, pFilename, gender, age, activityLevel):
 	nutrientValueDict = DataCollectionFunctions.getNutrientValueDict(database)
 	nutrientRelationshipsDict = DataCollectionFunctions.readNutrientRelationships()
-	idealValuesDict = DataCollectionFunctions.getSuggestedIntakes(gender, age, activityLevel)
-	idealValueDeviationDict = DataCollectionFunctions.getIdealValueDeviationDict(nutrientValueDict, idealValuesDict)
-	productNutrientDict = DataCollectionFunctions.getProductNutrientDict(database, nutrientRelationshipsDict, idealValuesDict)
-	standardizedProductNutrientDict = DataCollectionFunctions.convertDataToStandardUnits(idealValuesDict, idealValueDeviationDict, productNutrientDict)
-	productScoresDict = DataCollectionFunctions.getProductScores(standardizedProductNutrientDict)
-	#DataCollectionFunctions.plotPDF(productScoresDict)
-	DataCollectionFunctions.writeProductScores(productScoresDict, productNutrientDict, xFilename, yFilename, pFilename)
+	recommendedValuesDict = DataCollectionFunctions.getSuggestedIntakes(gender, age, activityLevel)
+	recommendedValueDeviationDict = DataCollectionFunctions.getRecommendedValueDeviationDict(nutrientValueDict, recommendedValuesDict)
+	productNutrientDict = DataCollectionFunctions.getProductNutrientDict(database, nutrientRelationshipsDict, recommendedValuesDict)
+	standardizedProductNutrientDict = DataCollectionFunctions.convertDataToStandardUnits(recommendedValuesDict, recommendedValueDeviationDict, productNutrientDict)
+	avgNutrDevDict = DataCollectionFunctions.getAvgNutrDevDict(standardizedProductNutrientDict)
+	#DataCollectionFunctions.plotPDF(avgNutrDevDict)
+	DataCollectionFunctions.writeProductLabels(avgNutrDevDict, productNutrientDict, xFilename, yFilename, pFilename)
 	#DataCollectionFunctions.printBestScores(productScoresDict, pythonDatabase, 2300)
 	print
 	
@@ -33,20 +33,24 @@ def main():
 
 	# Getting Data for Training
 	# [percentage of database used for cross validation, percentage of database used for training, percentage of database used for final accuracy testing]
-	#databaseList = DatabaseFunctions.randomSample(pythonDatabase, [0.20, 0.60, 0.20])
+	#databaseList = DatabaseFunctions.randomSample(pythonDatabase, [0.10, 0.70, 0.20])
 	#dataCollection(databaseList, filenames, "male", 22, "very active")
 
 	# Training Models
 	#svm.trainsvm(filenames)
 	#logit.trainLogisticRegression(filenames)
 
-	#model = svm.loadModel("model1.joblib")
+	# Test Models
+	svm.testModel("svm.joblib", filenames[2][0], filenames[2][1])
+	logit.testModel("logit.joblib", filenames[2][0], filenames[2][1])
+
+	#model = svm.loadModel("svm.joblib")
 	#databaseX, databaseY = DataCollectionFunctions.loadData("databaseX.json", "databaseY.json")
 	#svmScores = svm.getScores(model, databaseX).tolist()
-	#svm.saveScores(svmScores, "model1scores.json")
+	#svm.saveScores(svmScores, "svmScores.json")
 
-	productScoresDict = CompareProducts.createProductScoresDict(CompareProducts.loadProductIds(), CompareProducts.loadScores("model1scores.json"))
-	CompareProducts.compareProducts(45001669, 45001677, productScoresDict)
+	#productScoresDict = CompareProducts.createProductScoresDict(CompareProducts.loadProductIds(), CompareProducts.loadScores("svmScores.json"))
+	#CompareProducts.compareProducts(45001669, 45001677, productScoresDict)
 
 if __name__ == '__main__':
 	main()
